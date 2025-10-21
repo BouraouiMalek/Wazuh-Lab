@@ -1,0 +1,7 @@
+DCSync Simulation
+•	Run Mimikatz:
+privilege::debug
+lsadump::dcsync /domain:WinServ.local /user:Administrator 
+or 
+lsadump::dcsync /domain:WinServ.local /user:krbtgt
+•	Verify Wazuh alert id 110001 appears.

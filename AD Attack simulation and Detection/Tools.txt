@@ -1,0 +1,32 @@
+Mimikatz
+Purpose:
+•	Mimikatz is a tool used to extract credentials from memory in Windows environments.
+•	It can simulate attacks like:
+o	DCSync: Queries domain controllers to steal password hashes.
+o	Pass-the-Hash / Pass-the-Ticket: Uses captured credentials to authenticate as users.
+Utility in the lab:
+•	Allows us to simulate realistic Active Directory attacks.
+•	Helps us test if Wazuh rules can detect credential theft, abnormal privilege escalation, or suspicious access patterns.
+
+Kerberoast Attack Tools
+Purpose:
+•	Kerberoasting targets service accounts in Active Directory.
+•	The attacker requests a service ticket for a user account, extracts it, and attempts offline password cracking.
+Utility in the lab:
+•	Simulates one of the most common AD attacks in real enterprises.
+•	Lets us check whether Wazuh can detect suspicious ticket requests or abnormal Kerberos activity.
+•	Requires:
+o	Python for running tgsrepcrack.py.
+o	A list of potential passwords to crack (including the real password for the simulation).
+
+Sysmon
+Purpose:
+•	Sysmon (System Monitor) is a Windows system service that logs detailed events like:
+o	Process creation
+o	Network connections
+o	File modifications
+o	Registry changes
+Utility:
+•	Provides deep visibility into Windows activity.
+•	Wazuh collects Sysmon logs to detect sophisticated attacks that don’t trigger standard Windows security events.
+•	Critical for detecting subtle attacks like Kerberoasting or Golden Ticket attacks.

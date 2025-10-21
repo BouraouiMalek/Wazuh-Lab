@@ -1,0 +1,26 @@
+Create a scheduled task to run the script every 15 minutes as SYSTEM:
+
+
+# Create a Scheduled Task for auto Nmap scan
+$action = New-ScheduledTaskAction -Execute "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\python.exe" `
+    -Argument "`"C:\Program Files (x86)\soc-scripts\nmapscan.py`""
+
+# Trigger: start 1 min from now, repeat every 15 minutes, max 9999 days
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
+    -RepetitionInterval (New-TimeSpan -Minutes 15) `
+    -RepetitionDuration (New-TimeSpan -Days 9999)
+
+# Register the scheduled task as SYSTEM
+Register-ScheduledTask -TaskName "NmapAutoScan" `
+    -Action $action `
+    -Trigger $trigger `
+    -RunLevel Highest `
+    -User "SYSTEM" `
+    -Description "Automatically runs nmapscan.py every 15 minutes for Wazuh alerts"
+
+
+TO know Next Run Time and Last Run Time run
+
+Get-ScheduledTask -TaskName "NmapAutoScan" | Get-ScheduledTaskInfo
+
+Note: Using the Python script directly ensures Nmap is found via PATH. Compiling to .exe may fail if Python cannot locate Nmap.

@@ -1,0 +1,20 @@
+Ubuntu Deployment
+1.	Install dependencies:
+sudo apt update && sudo apt install -y python3 python3-pip nmap
+sudo pip3 install python-nmap
+
+2.	Place nmapscan.py in /home/malek/Documents/soc-scripts/:
+chmod 750 /home/malek/Documents/soc-scripts/nmapscan.py
+chown root:wazuh /home/malek/Documents/soc-scripts/nmapscan.py
+
+3.	Modify /var/ossec/etc/ossec.conf to run the script periodically:
+<localfile>
+<log_format>full_command</log_format>
+<command>python3 /home/malek/Documents/soc-scripts/nmapscan.py</command>
+<frequency>900</frequency> <!-- -->
+</localfile>
+       4.   Manual Test
+python3 /home/malek/Documents/soc-scripts/nmapscan.py
+    
+       5.  Restart Wazuh agent:
+sudo systemctl restart wazuh-agent

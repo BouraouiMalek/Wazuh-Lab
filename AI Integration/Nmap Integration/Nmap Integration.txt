@@ -1,0 +1,13 @@
+AI Integration — Nmap & Gemini
+Nmap
+Nmap is a free, open-source port scanner used to detect open ports, identify services, and gather system information (OS, versions, etc.). Available on Windows, macOS, and Linux.
+Gemini
+Gemini is a multimodal AI model (developed by Google). It can process text, images, video, and audio. In this project, Gemini enriches Nmap results with service explanations, known vulnerabilities, and operational recommendations.
+Integration Objective
+1.	Perform local scans from endpoints (Windows / Ubuntu) using Nmap.
+2.	Send structured JSON results to Wazuh via a Python script executed by the agent.
+3.	Detect Nmap results in Wazuh and enrich them via Gemini.
+
+Nmap Python Script (nmapscan.py)
+Windows Path: C:\Users\Administrator\Documents\soc-scripts\nmapscan.py
+Ubuntu Path: /home/malek/Documents/soc-scripts/nmapscan.py

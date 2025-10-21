@@ -1,0 +1,19 @@
+Extracting Passwords from ntds.dit and the SYSTEM Hive
+The ntds.dit file, normally located in C:\Windows\NTDS, is the database that stores all Active Directory information, including user password hashes. To simulate the attack and extract these hashes, we need to create a consistent copy of the file and associated registry keys, which allows us to decrypt passwords offline.
+To simulate the attack, we followed these steps:
+1- Run a SYSTEM session on the domain controller
+C:\Tools\PSTools> .\PsExec.exe \\WIN-1214V1PJ268 -s -i cmd
+
+•	This command opens a command prompt with SYSTEM privileges on the remote domain controller.
+• Why: Accessing ntds.dit and the registry keys requires SYSTEM privileges.
+2- Create a full IFM copy of the AD database
+C:\Windows\system32>ntdsutil "activate instance ntds" "ifm" "create full C:\Files" q q
+
+ •  activate instance ntds: Activates the NTDS instance to apply the following commands to the Active Directory service.
+•  ifm → create full C:\Files: Creates a full copy of the Active Directory database and the necessary registry files in the C:\Files directory.
+3- Back up the SYSTEM hive
+C:\Windows\system32>reg save HKLM\SYSTEM C:\Files\SYSTEM.hive
+
+The operation completed successfully.
+•	Sauvegarde de la ruche SYSTEM dans un fichier .hive.
+•	Pourquoi : cette ruche contient la BootKey, nécessaire pour déchiffrer les mots de passe stockés dans ntds.dit.

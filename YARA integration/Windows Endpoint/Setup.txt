@@ -1,0 +1,60 @@
+In Windows endpoints :
+-	Download and install the latest Visual C++ Redistributable package
+YARA Tool Installation
+-	Open PowerShell with administrator privileges to download and extract YARA
+Invoke-WebRequest -Uri https://github.com/VirusTotal/yara/releases/download/v4.2.3/yara-4.2.3-2029-win64.zip -OutFile v4.2.3-2029-win64.zip
+Expand-Archive v4.2.3-2029-win64.zip; Remove-Item v4.2.3-2029-win64.zip
+
+-	Create a directory called C:\Program Files (x86)\ossec-agent\active-response\bin\yara\ and copy the YARA executable into it
+mkdir 'C:\Program Files (x86)\ossec-agent\active-response\bin\yara\'
+cp .\v4.2.3-2029-win64\yara64.exe 'C:\Program Files (x86)\ossec-agent\active-response\bin\yara\'
+
+-	Install the valhallaAPI module
+pip install valhallaAPI
+
+-	Copy the following script and save it as download_yara_rules.py
+from valhallaAPI.valhalla import ValhallaAPI
+
+v = ValhallaAPI(api_key="1111111111111111111111111111111111111111111111111111111111111111")
+response = v.get_rules_text()
+
+with open('yara_rules.yar', 'w') as fh:
+    fh.write(response)
+
+-	Run the following commands to download the rules and place them in the C:\Program Files (x86)\ossec-agent\active-response\bin\yara\rules\ directory
+
+python.exe download_yara_rules.py
+mkdir 'C:\Program Files (x86)\ossec-agent\active-response\bin\yara\rules\'
+cp yara_rules.yar 'C:\Program Files (x86)\ossec-agent\active-response\bin\yara\rules\'
+
+Configure Active Response and FIM
+-	Create the yara.bat script in the C:\Program Files (x86)\ossec-agent\active-response\bin\ directory
+
+-	Add the directory to monitor in ossec conf : 
+<directories check_all="yes" realtime="yes">C:\projects</directories>
+
+-	The agent must know how to execute the custom command defined on the manager.
+              File: C:\Program Files (x86)\ossec-agent\ossec.conf
+<ossec_config>
+  <command>
+    <name>yara_windows</name>
+    <executable>yara.bat</executable>
+    <timeout_allowed>no</timeout_allowed>
+  </command>
+</ossec_config>
+
+
+-	Restart the Wazuh agent to apply the configuration changes:
+Restart-Service -Name wazuh
+
+Test the configuration
+-	Place the eicar.com file into the FIM-monitored directory (C:\projects).
+Download the EICAR zip file
+Invoke-WebRequest -Uri https://secure.eicar.org/eicar_com.zip -OutFile eicar.zip
+Unzip it: 
+Expand-Archive .\eicar.zip
+Copy the EICAR file to the monitored directory:
+cp .\eicar\eicar.com C:\projects
+-	Expected Result in Wazuh UI: The following alerts should appear in quick succession:
+Rule 554: File added to the system. (The trigger)
+Rule 108001 (Level 12): File "c:\projects\eicar.com" is a positive match. Yara rule: SUSP_Just_EICAR_RID2C24. (The final detection alert)

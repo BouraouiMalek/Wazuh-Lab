@@ -1,0 +1,4 @@
+. Kerberoasting Simulation
+•	Run Python Kerberoast script:
+python tgsrepcrack.py -d WinServ.local -u TargetUser -p passwords.txt -t TicketOutputFolder
+•	Verify alert id 110002.

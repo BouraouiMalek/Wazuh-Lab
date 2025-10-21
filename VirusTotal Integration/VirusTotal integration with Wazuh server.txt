@@ -1,0 +1,92 @@
+In Wazuh server :
+1- Configure /var/ossec/etc/ossec.conf to include:
+<integration>
+    <name>virustotal</name>
+    <api_key>VirusTotal API key</api_key>
+    <group>syscheck</group>
+    <alert_format>json</alert_format>
+</integration>
+
+2- Using FIM to monitor a specific directory (File integrity monitoring)
+In the Wazuh server and the Wazuh agent in the /var/ossec/etc/ossec.conf file
+<syscheck>
+  <directories check_all="yes" realtime="yes">/directory to monitor </directories>
+</syscheck>
+
+3- Adding the necessary rules to generate alerts ( /var/ossec/etc/rules/local_rules.xml)
+<!-- Cross-platform FIM and VirusTotal rules -->
+<group name="syscheck,virustotal">
+
+  <!-- Linux FIM monitoring -->
+  <rule id="100200" level="7">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>^/tmp/apps/.*</match>
+    </field>
+    <description>File modified in /tmp/apps directory (Linux).</description>
+  </rule>
+
+  <rule id="100201" level="7">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>^/tmp/apps/.*</match>
+    </field>
+    <description>File added to /tmp/apps directory (Linux).</description>
+  </rule>
+
+  <rule id="100210" level="10">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>.*\.(sh|py|exe|dll|bin)$</match>
+    </field>
+    <description>Executable/script file modified — sending hash to VirusTotal (Linux).</description> 
+  </rule>
+
+  <rule id="100211" level="10">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>.*\.(sh|py|exe|dll|bin)$</match>
+    </field>
+    <description>New executable/script file detected — sending hash to VirusTotal (Linux).</description>
+  </rule>
+
+  <!-- Windows FIM monitoring -->
+  <rule id="110200" level="7">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>^C:\\apps\\.*</match>
+    </field>
+    <description>File modified in C:\apps directory (Windows).</description>
+  </rule>
+
+  <rule id="110201" level="7">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>^C:\\apps\\.*</match>
+    </field>
+    <description>File added to C:\apps directory (Windows).</description>
+  </rule>
+
+  <rule id="110210" level="10">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>.*\.(exe|dll|py|bin)$</match>
+    </field>
+    <description>Executable/script file modified — sending hash to VirusTotal (Windows).</description>
+  </rule>
+
+  <rule id="110211" level="10">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>.*\.(exe|dll|py|bin)$</match>
+    </field>
+    <description>New executable/script file detected — sending hash to VirusTotal (Windows).</description>
+  </rule>
+</group>
+
+After applying the configuration we must restart the Wazuh server :
+systemctl restart wazuh-manager
+
+• Verified service status and alert generation:
+systemctl status wazuh-manager
+tail -f /var/ossec/logs/alerts/alerts.json

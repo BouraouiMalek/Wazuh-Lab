@@ -1,0 +1,17 @@
+VMware & Network Setup
+•	VMware Workstation Pro installed
+Source: https://support.broadcom.com/group/ecx/my-dashboard
+•	Network Mode:
+o	Host-Only network (VMnet1)
+o	Subnet: 192.168.182.0
+o	Subnet mask: 255.255.255.0
+o	Purpose: isolated lab, static IP assignment
+o	No internet access by default (can switch to NAT if needed temporarily)
+
+2. Virtual Machines Overview
+VM Name	OS Version	Role / Notes
+Wazuh	Ubuntu	SIEM Manager & monitoring system
+Windows 10	Windows 10 Pro	Endpoint workstation
+Windows AD	Windows Server 2022 Std	Domain Controller with AD DS role
+Ubuntu	Ubuntu 22.04	Additional Linux client
+Kali Linux	Kali 2025.2 (Prebuilt)	Attacker machine (prebuilt .7z image, ~80GB VMDK)

@@ -1,0 +1,123 @@
+Create in wazuh server in /var/ossec/integrations/custom-gemini.py
+
+
+#!/var/ossec/framework/python/bin/python3
+# Copyright (C) 2015-2023, Wazuh Inc.
+# Gemini Integration for Nmap Enrichment
+
+import json
+import sys
+import time
+import os
+from socket import socket, AF_UNIX, SOCK_DGRAM
+
+try:
+    import requests
+except Exception as e:
+    print("No module 'requests' found. Install: pip install requests")
+    sys.exit(1)
+
+# Globals
+debug_enabled = True   # set False in production
+pwd = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+now = time.strftime("%a %b %d %H:%M:%S %Z %Y")
+
+log_file = f"{pwd}/logs/integrations.log"
+socket_addr = f"{pwd}/queue/sockets/queue"
+
+# ---- DEBUG ----
+def debug(msg):
+    if debug_enabled:
+        out = f"{now}: {msg}\n"
+        print(out)
+        with open(log_file, "a") as f:
+            f.write(out)
+
+# ---- GEMINI QUERY ----
+def query_gemini(nmap_port_service, apikey):
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apikey
+    }
+    payload = {
+        "contents": [{
+            "parts": [{
+                "text": f"In 4-5 sentences, explain the service '{nmap_port_service}', list common vulnerabilities (if any), and give a recommendation."
+            }]
+        }]
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code == 200:
+        gemini_data = response.json()
+        try:
+            text_output = gemini_data["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception:
+            text_output = "No enrichment available."
+        return {
+            "nmap_port_service": nmap_port_service,
+            "gemini_summary": text_output
+        }
+    else:
+        debug(f"# Error {response.status_code}: {response.text}")
+        return {
+            "nmap_port_service": nmap_port_service,
+            "gemini_summary": "Error querying Gemini API"
+        }
+
+# ---- MAIN ----
+def main(args):
+    if len(args) < 2:
+        debug("# Exiting: Bad arguments.")
+        sys.exit(1)
+
+    alert_file_location = args[1]
+    apikey = os.getenv("GEMINI_API_KEY")
+
+    if not apikey:
+        debug("# Missing GEMINI_API_KEY in environment.")
+        sys.exit(1)
+
+    # Load alert
+    with open(alert_file_location) as f:
+        alert = json.load(f)
+
+    debug(f"# Processing alert: {alert}")
+
+    if "nmap_port_service" not in alert.get("data", {}):
+        debug("# No nmap_port_service found in alert. Exiting.")
+        return
+
+    # Query Gemini
+    enriched = query_gemini(alert["data"]["nmap_port_service"], apikey)
+
+    # Build enriched alert
+    alert_output = {
+        "integration": "custom-gemini",
+        "gemini": enriched,
+        "source_alert": alert
+    }
+
+    send_event(alert_output, alert.get("agent"))
+
+# ---- SEND EVENT TO WAZUH ----
+def send_event(msg, agent=None):
+    if not agent or agent.get("id") == "000":
+        string = f'1:gemini:{json.dumps(msg)}'
+    else:
+        string = f'1:[{agent["id"]}] ({agent["name"]}) {agent.get("ip", "any")}->gemini:{json.dumps(msg)}'
+
+    debug(f"# Sending event: {string}")
+    sock = socket(AF_UNIX, SOCK_DGRAM)
+    sock.connect(socket_addr)
+    sock.send(string.encode())
+    sock.close()
+
+if __name__ == "__main__":
+    try:
+        main(sys.argv)
+    except Exception as e:
+        debug(f"# Exception: {str(e)}")
+        raise

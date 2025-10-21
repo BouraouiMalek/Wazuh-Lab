@@ -1,0 +1,48 @@
+Ubuntu Endpoint Configuration
+-	Download, compile, and install YARA
+sudo apt update
+sudo apt install -y make gcc autoconf libtool libssl-dev pkg-config
+sudo curl -LO https://github.com/VirusTotal/yara/archive/v4.2.3.tar.gz
+sudo tar -xvzf v4.2.3.tar.gz -C /usr/local/bin/ && rm -f v4.2.3.tar.gz
+cd /usr/local/bin/yara-4.2.3/
+sudo ./bootstrap.sh && sudo ./configure && sudo make && sudo make install && sudo make check
+
+-	Test that YARA is running properly : yara
+If the error message below is displayed:
+sudo su
+echo "/usr/local/lib" >> /etc/ld.so.conf
+ldconfig
+
+-	Download YARA detection rules
+sudo mkdir -p /var/ossec/etc/yara/rules/
+sudo curl 'https://valhalla.nextron-systems.com/api/v1/get' \
+-H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+-H 'Accept-Language: en-US,en;q=0.5' \
+--compressed \
+-H 'Referer: https://valhalla.nextron-systems.com/' \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-H 'DNT: 1' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' \
+--data 'demo=demo&apikey=1111111111111111111111111111111111111111111111111111111111111111&format=text' \
+-o /var/ossec/etc/yara/rules/yara_rules.yar
+
+
+-	Create a /var/ossec/active-response/bin/yara.sh file
+-	Change the script ownership and permissions
+sudo chmod 750 /var/ossec/active-response/bin/yara.sh
+sudo chown root:wazuh /var/ossec/active-response/bin/yara.sh
+
+-	Install the jq utility to process the JSON data from the FIM alerts
+sudo apt install -y jq
+
+-	Add the directory to monitor in ossec conf : 
+<directories check_all="yes" realtime="yes">tmp/apps</directories>
+
+
+Test the configuration
+Download EICAR
+Invoke-WebRequest -Uri https://secure.eicar.org/eicar_com.zip -OutFile eicar.zip
+unzip eicar.zip
+
+# Copy to the monitored path
+sudo cp eicar.com /var/ossec/tmp/apps/
+

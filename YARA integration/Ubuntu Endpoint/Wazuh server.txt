@@ -1,0 +1,20 @@
+Wazuh server configuration
+-	Add the custom decoders to the /var/ossec/etc/decoders/local_decoder.xml file.
+-	Add the custom rules to the /var/ossec/etc/rules/local_rules.xml file
+-	Configure the execution of the YARA script in the Wazuh server /var/ossec/etc/ossec.conf
+<ossec_config>
+  <command>
+    <name>yara_linux</name>
+    <executable>yara.sh</executable>
+    <extra_args>-yara_path /usr/local/bin -yara_rules /var/ossec/etc/yara/rules/yara_rules.yar</extra_args>
+    <timeout_allowed>no</timeout_allowed>
+  </command>
+
+  <active-response>
+    <disabled>no</disabled>
+    <command>yara_linux</command>
+    <location>local</location>
+    <rules_id>554,550</rules_id>
+  </active-response>
+</ossec_config>
+The command must be added in the /var/ossec/etc/ossec.conf in ubuntu endpoint

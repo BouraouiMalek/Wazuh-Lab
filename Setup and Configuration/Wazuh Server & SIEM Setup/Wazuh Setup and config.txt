@@ -1,0 +1,49 @@
+The Wazuh Manager serves as the central brain of the SIEM, handling log collection, analysis, correlation, and automated response orchestration.
+
+Component	Operating System	Role / Configuration
+Wazuh Manager	Ubuntu 22.04 LTS (VM)	Central SIEM, Log Correlation, and Active Response Engine.
+
+Export to Sheets
+Setup Steps:
+
+Server Installation:
+
+Installed Ubuntu 22.04 LTS on the virtual machine.
+
+Installed the Wazuh Manager, Indexer, and Dashboard via the official installation assistant (https://documentation.wazuh.com/current/quickstart.html).
+
+Configuration:
+
+Manually configured the main configuration file, /var/ossec/etc/ossec.conf, to define settings for FIM (File Integrity Monitoring), syscheck, alert thresholds, and all custom integrations (VirusTotal, Gemini, Nmap).
+
+Access:
+
+The Wazuh Dashboard is accessible via HTTPS: https://<WAZUH_DASHBOARD_IP_ADDRESS>
+
+Credentials: Username: admin / Password: <ADMIN_PASSWORD> (Note: The password is displayed upon successful completion of the installation script).
+
+Wazuh Agent Installation and Enrollment
+Agents are installed on all Windows and Linux endpoints to collect necessary telemetry and enable host-based security controls.
+
+Endpoint	Method Used
+Windows 10 Pro	Wazuh Web UI Deployment (Recommended)
+Windows Server 2022 (DC)	Wazuh Web UI Deployment (Recommended)
+Ubuntu 22.04 (Client)	Wazuh Web UI Deployment (Recommended)
+
+Export to Sheets
+Agent Deployment Steps (via Wazuh Web UI):
+
+Access the Dashboard: Log in to the Wazuh Web UI.
+
+Navigate: Go to "Agents" -> "Deploy New Agent."
+
+Select OS: Choose the target Operating System (e.g., Windows, Ubuntu).
+
+Configure Parameters:
+
+Enter the IP address of the Wazuh Manager.
+
+Specify the agent name (e.g., Win10-Endpoint, AD-DC).
+
+Run Command: Copy the provided installation command (which includes the necessary enrollment key) and run it directly on the target virtual machine's terminal or PowerShell instance.
+

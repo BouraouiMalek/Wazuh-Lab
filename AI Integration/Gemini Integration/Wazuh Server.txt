@@ -1,0 +1,20 @@
+Wazuh Manager Integration
+1.	Place the Python file:
+sudo nano /var/ossec/integrations/custom-gemini.py
+
+sudo chmod 750 /var/ossec/integrations/custom-gemini.py
+sudo chown root:wazuh /var/ossec/integrations/custom-gemini.py
+
+2.	Add Gemini integration in /var/ossec/etc/ossec.conf:
+<integration>
+  <name>custom-gemini</name>
+  <alert_format>json</alert_format>
+  <rule_id>100101</rule_id>
+</integration>
+
+3.	Restart Wazuh manager:
+sudo systemctl restart wazuh-manager
+
+Manual Test
+sudo /var/ossec/framework/python/bin/python3 \
+  /var/ossec/integrations/custom-gemini.py /tmp/test-alert.json $GEMINI_API_KEY debug

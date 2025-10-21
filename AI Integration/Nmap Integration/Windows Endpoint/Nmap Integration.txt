@@ -1,0 +1,25 @@
+Windows Deployment 
+1.	Install Python, Nmap, and python-nmap:
+pip install python-nmap
+
+2.	Ensure Nmap is installed (e.g., C:\Program Files (x86)\Nmap) and added to the system PATH:
+o	Open Environment Variables → System Variables → Path → Edit → Add:
+o	C:\Program Files (x86)\Nmap
+o	This allows Python’s nmap module to find the Nmap executable.
+3.	Test the Python script manually:
+Add nmapscan.py in C:\Program Files (x86)\soc-scripts
+& "C:\Users\Administrator\AppData\Local\Programs\Python\Python313\python.exe" "C:\Program Files (x86)\soc-scripts\nmapscan.py"
+
+•	Expected result: JSON entries are appended to:
+•	C:\Program Files (x86)\ossec-agent\active-response\active-responses.log
+4.	Configure ossec.conf to run the script automatically:
+<localfile>
+  <log_format>full_command</log_format>     <command>"C:\Users\Administrator\AppData\Local\Programs\Python\Python313\python.exe" "C:\Program Files (x86)\soc-scripts\nmapscan.py"</command>
+  <frequency>900</frequency>
+</localfile>
+
+5.	Restart Wazuh agent:
+Restart-Service -Name wazuh
+
+1.	Important : 
+Create a scheduled task to run the script every 15 minutes as SYSTEM

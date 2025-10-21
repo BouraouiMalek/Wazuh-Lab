@@ -1,0 +1,47 @@
+Prepare the Windows Endpoint for Attack Simulation
+Make sure the Windows machine can run attack tools safely.
+
+- Disable Windows Defender
+o	Open PowerShell as Administrator.
+o	Run:
+o	Set-MpPreference -DisableRealtimeMonitoring $true
+o	Verify:
+o	Get-MpComputerStatus | Select-Object RealTimeProtectionEnabled
+It should return False.
+   Install Defender Control
+o	Download from a trusted source.
+o	Run as Administrator and temporarily disable all Defender protections.
+
+- Download and Prepare Attack Tools
+Mimikatz
+o	Download from official GitHub.
+o	Place binaries in a folder in C:\tools\Mimikatz
+
+Kerberoast
+o	Download the Kerberoast script from GitHub.
+o	Prepare a password list that includes the password of the target account “passwords.txt”
+o	Make sure Python is installed (latest version) to run tgsrepcrack.py.
+o	Place in a folder in C:\tools\ Kerberoast
+
+- Prepare the Windows Domain Environment
+Join the Domain
+o	Make sure your Windows endpoint is joined to the domain sfm.local.
+o	Use domain admin credentials.
+o	Verify domain join by logging in with a domain account.
+Create a Domain Account for Simulation
+o	This account will simulate a compromised user.
+o	Assign local administrator privileges on the endpoint.
+Note: Integration ensures centralized management and that Wazuh can collect domain-level events.
+Its Allready done in previous steps
+
+- Install Sysmon
+•	Download Sysmon from Microsoft Sysinternals.
+•	Use the configuration file sysmonconfig.xml
+•	Install Sysmon on both the Domain Controller and the Windows endpoint:
+sysmon.exe -accepteula -i sysmonconfig.xml
+•	Configure Wazuh agent to collect Sysmon logs:
+Edit C:\Program Files (x86)\ossec-agent\ossec.conf:
+<localfile>
+  <location>Microsoft-Windows-Sysmon/Operational</location>
+  <logformat>eventchannel</logformat>
+</localfile>

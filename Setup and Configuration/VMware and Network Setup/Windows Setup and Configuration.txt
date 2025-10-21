@@ -1,0 +1,37 @@
+Windows Server Setup & Configuration
+Version chosen: Windows Server 2022 Standard with GUI
+•	IP Configuration:
+o	Static IP assigned: 192.168.182.10
+o	Subnet Mask: 255.255.255.0
+o	Preferred DNS: 192.168.182.10
+
+•	Installed & Configured: Active Directory Domain Services (AD DS)
+o	Added AD DS role via Server Manager
+o	Promoted server to Domain Controller
+o	Created new domain and forest : WinServ.local
+o	DNS server installed automatically
+o	Set Directory Services Restore Mode (DSRM) password
+
+Windows 10 VM Configuration
+•	IP Configuration:
+o	Static IP assigned: 192.168.182.20
+o	Subnet Mask: 255.255.255.0
+o	Default Gateway: host IP 
+o	DNS Server: Set to Domain Controller IP (192.168.182.10) to enable domain discovery and join
+•	Domain Join:
+o	Joined Windows 10 VM to domain WinServ.local using domain admin credentials
+o	Successfully logged in with domain user
+
+Network & Firewall Setup
+•	Network: All VMs connected to VMnet1 Host-only network
+•	Firewall:
+o	Disabled Windows Firewall on Host and all VMs temporarily during network and domain setup to avoid blocking traffic
+o	Allowed ICMP (ping) and File and Printer Sharing for “Local Subnet” network profile in firewall rules (after testing)
+
+
+Connectivity Verification
+•	Verified successful ping between:
+o	Host machine <-> VMs
+o	VM <-> VM
+•	Verified nslookup WinServ.local resolves to 192.168.182.10 (DC IP)
+•	Verified domain join without errors

@@ -1,0 +1,29 @@
+Gemini Integration
+
+The Gemini integration enriches Nmap alerts with AI-generated insights about each detected service, including:
+•	Service explanation
+•	Known vulnerabilities
+•	Operational recommendations
+Gemini is deployed on the Wazuh manager, not on the agent. It consumes Nmap alert JSON sent from agents and posts the enriched alert back into Wazuh for UI display.
+Files and Locations
+File	Purpose	Location
+custom-gemini.py	Python integration script to query Gemini API and send enriched alerts	/var/ossec/integrations/custom-gemini.py
+test-alert.json	Sample alert for manual testing	/tmp/test-alert.json
+
+custom-gemini.py 
+•	Reads alerts in JSON format
+•	Checks for nmap_port_service field
+•	Calls Gemini API using gemini-2.0-flash model
+•	Receives AI-generated text summary
+•	Sends enriched alert back to Wazuh using Unix socket
+
+Environment Setup
+1.	Set Gemini API Key from https://aistudio.google.com/app/apikey
+# On Ubuntu Wazuh server(temporary, per session)
+export GEMINI_API_KEY="API_KEY"
+# On Ubuntu (persistent)
+sudo nano /etc/environment
+# Add:
+GEMINI_API_KEY="API_KEY"
+# Reload environment:
+source /etc/environment

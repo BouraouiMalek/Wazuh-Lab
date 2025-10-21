@@ -1,0 +1,81 @@
+Blocking an SSH brute-force attack with Active Response
+
+Simulate an SSH brute-force attack from the Kali VM against the Ubuntu endpoint, detect the attack with Wazuh, and automatically block the attacker IP using Active Response (firewall-drop).
+
+Context and topology
+•	Wazuh Manager (Defender): wazuh-server (manager: 192.168.182.134)
+•	Endpoint (Victim): Ubuntu-Desktop with Wazuh Agent installed (lab IP: 192.168.182.131)
+•	Attacker: Kali VM (IP during tests: 192.168.182.136)
+pplied configuration (summary)
+1.	Wazuh Manager (/var/ossec/etc/ossec.conf):
+o	Declare the active-response command:
+<command>
+  <name>firewall-drop</name>
+  <executable>firewall-drop</executable>
+  <timeout_allowed>yes</timeout_allowed>
+</command>
+
+o	Declared an active-response with local location (to run on the agent) linked to the SSH detection rule:
+<active-response>
+  <disabled>no</disabled>
+  <command>firewall-drop</command>
+  <location>local</location>
+  <rules_id>100300</rules_id>
+  <timeout>180</timeout> <!-- Blocks for 180 seconds-->
+</active-response>
+
+2.	Ubuntu Agent (/var/ossec/etc/ossec.conf):
+o	Declared the firewall-drop command (same name as on the manager):
+<command>
+  <name>firewall-drop</name>
+  <executable>firewall-drop</executable>
+  <timeout_allowed>yes</timeout_allowed>
+</command>
+
+o	Configured a local active-response with a timeout to avoid permanent blocks:
+<active-response>
+<disabled>no</disabled>
+<command>firewall-drop</command>
+<location>local</location>
+<rules_id>100300</rules_id>
+<timeout>180</timeout> <!-- Blocks for 180 seconds-->
+</active-response>
+<timeout>180</timeout> <!-- Blocks for 180 seconds 
+without timeout that cause persistent blocks
+
+Custom SSH Brute-Force Rules:
+<!-- SSH brute-force correlation & active-response -->
+<group name="sshd,correlation">
+
+  <!-- Detect brute force -->
+  <rule id="100300" level="10">
+    <if_matched_sid>5760</if_matched_sid>
+    <description>SSH brute force attack trying to get access to the system (multiple SSH auth failures detected).</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <!-- Friendly alert for firewall-drop -->
+  <rule id="100301" level="7">
+    <if_matched_sid>651</if_matched_sid>
+    <field name="program">active-response/bin/firewall-drop</field>
+    <description>Host blocked by firewall-drop Active Response.</description>
+    <options>no_full_log</options>
+  </rule>
+
+</group>
+
+
+Attack Simulation Steps:
+1.	On the Kali VM, run a brute-force SSH attempt against the Ubuntu-Desktop:
+2.	hydra -l malek -P passwords.txt 192.168.182.131 ssh
+user : malek / password file link : passwords.txt / Victim IP : 192.168.182.131
+3.	Wazuh Agent detects multiple SSH authentication failures.
+4.	Active Response triggers firewall-drop and temporarily blocks the attacker's IP (192.168.182.136).
+5.	Verify the block on the Ubuntu-Desktop using:
+6.	sudo iptables -L INPUT -n --line-numbers
+              sudo iptables -D INPUT <line-number>    # To delete specif table to unblock
+7.	After the timeout (180 seconds), the block is automatically lifted.
+Outcome:
+•	SSH brute-force attacks are detected and mitigated in real-time.
+•	Attacker’s IP is temporarily blocked to prevent system compromise.
+•	Timeout ensures repeated testing without permanent network disruption.

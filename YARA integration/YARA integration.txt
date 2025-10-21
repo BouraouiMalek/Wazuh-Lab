@@ -1,0 +1,4 @@
+Detecting malware using YARA integration
+
+YARA is a powerful, open-source tool primarily used by security researchers and malware analysts to identify and classify malware samples based on textual or binary patterns. Often described as the "Swiss Army Knife" for pattern matching, it operates by allowing users to create rules consisting of strings, regular expressions, and logical conditions. 
+When YARA is run against a file or directory, it searches for these defined patterns; if a file matches the rule's conditions, YARA outputs the name of the rule and the matching file, enabling quick and reliable detection of threats like specific malware families or files containing known malicious code.

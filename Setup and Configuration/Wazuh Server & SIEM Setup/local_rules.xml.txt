@@ -1,0 +1,232 @@
+<!-- Cross-platform FIM and VirusTotal rules -->
+<group name="syscheck,virustotal">
+
+  <!-- Linux FIM monitoring -->
+  <rule id="100200" level="7">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>^/tmp/apps/.*</match>
+    </field>
+    <description>File modified in /tmp/apps directory (Linux).</description>
+  </rule>
+
+  <rule id="100201" level="7">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>^/tmp/apps/.*</match>
+    </field>
+    <description>File added to /tmp/apps directory (Linux).</description>
+  </rule>
+
+  <rule id="100210" level="10">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>.*\.(sh|py|exe|dll|bin)$</match>
+    </field>
+    <description>Executable/script file modified — sending hash to VirusTotal (Linux).</description> 
+  </rule>
+
+  <rule id="100211" level="10">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>.*\.(sh|py|exe|dll|bin)$</match>
+    </field>
+    <description>New executable/script file detected — sending hash to VirusTotal (Linux).</description>
+  </rule>
+
+  <!-- Windows FIM monitoring -->
+  <rule id="110200" level="7">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>^C:\\apps\\.*</match>
+    </field>
+    <description>File modified in C:\apps directory (Windows).</description>
+  </rule>
+
+  <rule id="110201" level="7">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>^C:\\apps\\.*</match>
+    </field>
+    <description>File added to C:\apps directory (Windows).</description>
+  </rule>
+
+  <rule id="110210" level="10">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>.*\.(exe|dll|py|bin)$</match>
+    </field>
+    <description>Executable/script file modified — sending hash to VirusTotal (Windows).</description>
+  </rule>
+
+  <rule id="110211" level="10">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>.*\.(exe|dll|py|bin)$</match>
+    </field>
+    <description>New executable/script file detected — sending hash to VirusTotal (Windows).</description>
+  </rule>
+
+<!-- VirusTotal Threat Removal Status (common for all OS) -->
+  <rule id="100092" level="12">
+    <if_sid>657</if_sid>
+    <match>Successfully removed threat</match>
+    <description>$(parameters.program) removed threat located at $(parameters.alert.data.virustotal.source.file)</description>
+  </rule>
+
+  <rule id="100093" level="12">
+    <if_sid>657</if_sid>
+    <match>Error removing threat</match>
+    <description>Error removing threat located at $(parameters.alert.data.virustotal.source.file)</description>
+  </rule>
+ 
+ <!-- Rule for detecting Pass-the-Hash attacks -->
+  <rule id="110010" level="12">
+    <if_sid>60106</if_sid>
+    <field name="win.system.eventID">4624</field>
+    <field name="win.eventdata.logonType">3</field>
+    <field name="win.eventdata.authenticationPackageName">NTLM</field>
+    <field name="win.eventdata.elevatedToken">%%1842</field>
+    <options>no_full_log</options>
+    <description>Possible Pass-the-Hash attack</description>
+  </rule>  
+ 
+</group>
+
+<group name="security_event, windows">
+
+  <!-- Rule for detecting DCSync attacks using Windows security events -->
+ <rule id="110001" level="12">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4662$</field>
+    <field name="win.eventdata.properties" type="pcre2">{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2}|{19195a5b-6da0-11d0-afd3-00c04fd930c9}</field>
+    <options>no_full_log</options>
+    <description>Directory Service Access. Possible DCSync attack</description>
+ </rule>
+ <!-- Rule to ignore Directory Service Access originating from machine accounts with $ in their names -->
+ <rule id="110009" level="0">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4662$</field>
+    <field name="win.eventdata.properties" type="pcre2">{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2}|{19195a5b-6da0-11d0-afd3-00c04fd930c9}</field>
+    <field name="win.eventdata.SubjectUserName" type="pcre2">\$$</field>
+    <options>no_full_log</options>
+    <description>Ignore all Directory Service Access that is originated from a machine account containing $</description>
+  </rule>
+
+<!-- Rule for detecting Keberoasting attacks using Windows security events -->
+  <rule id="110002" level="12">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4769$</field>
+    <field name="win.eventdata.TicketOptions" type="pcre2">0x40810000</field>
+    <field name="win.eventdata.TicketEncryptionType" type="pcre2">0x17</field>
+    <options>no_full_log</options>
+    <description>Possible Keberoasting attack</description>
+  </rule>
+
+  <!-- Rule for detecting Golden Ticket attacks using Windows security events -->
+  <rule id="110003" level="12"> 
+    <if_sid>60106</if_sid>
+    <field name="win.system.eventID">4624</field>
+    <field name="win.eventdata.logonType">3</field>
+    <field name="win.eventdata.authenticationPackageName">Kerberos</field>
+    <field name="win.eventdata.elevatedToken">%%1842</field>
+    <description>Possible Golden Ticket attack (Network logon with elevated token)</description>
+    <options>no_full_log</options>
+  </rule>
+
+</group>
+
+  <!-- Custom SSH brute-force correlation & active-response -->
+
+<group name="sshd,correlation">
+
+  <!-- Detect brute force -->
+  <rule id="100300" level="10">
+    <if_matched_sid>5760</if_matched_sid>
+    <description>SSH brute force attack trying to get access to the system (multiple SSH auth failures detected).</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <!-- Friendly alert for firewall-drop -->
+  <rule id="100301" level="7">
+    <if_matched_sid>651</if_matched_sid>
+    <field name="program">active-response/bin/firewall-drop</field>
+    <description>Host blocked by firewall-drop Active Response.</description>
+    <options>no_full_log</options>
+  </rule>
+
+</group>
+
+ <!-- Custom NMAP rules -->
+
+<group name="local,nmap,">
+    <rule id="100100" level="3">
+        <decoded_as>json</decoded_as>
+        <field name="nmap_port">\.+</field>
+        <field name="nmap_port_service">\.+</field>
+        <description>NMAP: Host scan. Port $(nmap_port) is open and hosting the $(nmap_port_service) service.</description>
+        <options>no_full_log</options>
+    </rule>
+</group>
+
+<!-- Custom GEMINI rules -->
+
+<group name="local,gemini,">
+    <rule id="100102" level="6">
+        <field name="gemini.nmap_port_service">\w+</field>
+        <description>Gemini AI enriched Nmap service alert</description>
+    </rule>
+</group>
+
+<!-- LLMNR/SMB rules -->
+
+<group name="smb_relay_detection">
+  <rule id="100020" level="12">
+    <field name="win.system.eventID">4624</field>
+    <field name="win.eventdata.logonType">3</field>
+    <field name="win.eventdata.authenticationPackageName">NTLM</field>
+    <description>SMB Relay / NTLM network logon detected</description>
+    <group>windows,authentication_success,attack</group>
+  </rule>
+
+  <rule id="100021" level="10">
+    <field name="win.system.eventID">4625</field>
+    <field name="win.eventdata.logonType">3</field>
+    <field name="win.eventdata.authenticationPackageName">NTLM</field>
+    <description>SMB Relay / NTLM network logon failed</description>
+    <group>windows,authentication_failed,attack</group>
+  </rule>
+</group>
+
+<!-- YARA rules -->
+<!-- Windows FIM monitoring -->
+<group name="syscheck,yara">
+ <rule id="110300" level="10">
+    <if_sid>550</if_sid>
+    <field name="file">
+      <match>^C:\\projects\\.*</match>
+    </field>
+    <description>File modified in C:\projects directory (Windows).</description>
+  </rule>
+
+  <rule id="110301" level="10">
+    <if_sid>554</if_sid>
+    <field name="file">
+      <match>^C:\\projects\\.*</match>
+    </field>
+    <description>File added to C:\projects directory (Windows).</description>
+  </rule>
+</group>
+
+<group name="yara,">
+  <rule id="108000" level="0">
+    <decoded_as>yara_decoder</decoded_as>
+    <description>Yara grouping rule</description>
+  </rule>
+
+  <rule id="108001" level="12">
+    <if_sid>108000</if_sid>
+    <match>wazuh-yara: INFO - Scan result: </match>
+    <description>File "$(yara_scanned_file)" is a positive match. Yara rule: $(yara_rule)</description>
+  </rule>
+</group>

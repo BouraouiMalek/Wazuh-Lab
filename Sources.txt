@@ -1,0 +1,11 @@
+Sources :
+
+https://documentation.wazuh.com/current/user-manual/capabilities/malware-detection/virus-total-integration.html
+
+https://documentation.wazuh.com/current/proof-of-concept-guide/detect-remove-malware-virustotal.html
+
+https://wazuh.com/blog/detection-with-opensearch-integration/
+
+https://github-wiki-see.page/m/wazuh/wazuh-dashboard-plugins/wiki/Legacy
+
+https://documentation.wazuh.com/current/user-manual/capabilities/malware-detection/fim-yara.html#use-case-detecting-malware-on-windows-endpoints-using-yara

