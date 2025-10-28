@@ -41,6 +41,7 @@ Its Allready done in previous steps
 sysmon.exe -accepteula -i sysmonconfig.xml
 •	Configure Wazuh agent to collect Sysmon logs:
 Edit C:\Program Files (x86)\ossec-agent\ossec.conf:
+
 <localfile>
   <location>Microsoft-Windows-Sysmon/Operational</location>
   <logformat>eventchannel</logformat>
