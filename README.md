@@ -1,5 +1,7 @@
 # 🧠 Wazuh SOC Lab — Threat Detection & Response Project
 
+![Wazuh SOC Lab Diagram](Documentation/Project%20Diagram.png)
+
 ## 📌 Overview
 This project is a **fully isolated SOC (Security Operations Center) lab** built from scratch to simulate real-world cyberattacks and detect them using **Wazuh SIEM**.
 
