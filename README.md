@@ -65,7 +65,7 @@ Each attack was detected and correlated in **Wazuh Dashboard** with custom rules
 **Malek Bouraoui**  
 Software Engineer | Aspiring SOC Analyst  
 📍 Tunisia  
-🔗 [LinkedIn]([https://www.linkedin.com/in/bouraouimalek](https://www.linkedin.com/in/malek-bouraoui/)  
+🔗 [LinkedIn](https://www.linkedin.com/in/malek-bouraoui/)  
 🔗 [GitHub](https://github.com/BouraouiMalek)
 
 ---
