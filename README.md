@@ -70,7 +70,4 @@ Software Engineer | Aspiring SOC Analyst
 
 ---
 
-⭐ _Learning by doing — turning theory into practice.
-
-
-## 📊 Example Detection Flow
+⭐ Learning by doing — turning theory into practice.
