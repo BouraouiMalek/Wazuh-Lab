@@ -1,75 +1,74 @@
-# 🧠 Wazuh SOC Lab — Threat Detection & Response Project
+# 🛡️ Integrated SOC Lab: Detection Engineering & Threat Response Pipeline
 
-![Wazuh SOC Lab Diagram](Documentation/Project%20Diagram.png)
+![Architecture Diagram](Documentation/Project%20Diagram.png)
 
-## 📌 Overview
-This project is a **fully isolated SOC (Security Operations Center) lab** built from scratch to simulate real-world cyberattacks and detect them using **Wazuh SIEM**.
+A production-like, isolated security operations lab built to demonstrate **end-to-end threat detection, automated response, and threat intelligence integration**. This project goes beyond simple tool setup to operationalize a full stack (Wazuh SIEM, TheHive/Cortex SOAR, OpenCTI TIP) against realistic adversary emulation.
 
-It includes **Active Directory**, multiple endpoints, and an attacker machine to test detection and automated response for various attack scenarios.
+## 🎯 Objectives Demonstrated
+1.  **Operationalize Detection:** Build and tune detection logic (Wazuh rules) for high-fidelity alerts against critical MITRE ATT&CK techniques.
+2.  **Automate Response:** Implement active response scripts for real-time threat mitigation (malware removal, IP blocking).
+3.  **Integrate Security Tools:** Create a cohesive workflow from detection (Wazuh) to case management (TheHive), analysis (Cortex), and threat intelligence (OpenCTI).
+4.  **Validate with Adversary Emulation:** Test detection efficacy against simulated advanced attacks in a controlled Active Directory environment.
 
----
+## ⚙️ Lab Architecture
+| Role | OS | Purpose |
+|------|----|---------|
+| **SIEM & Management** | Ubuntu Server | Wazuh Manager & Dashboard |
+| **Domain Controller** | Windows Server 2022 | AD DS, DNS (Domain: `WinServ.local`) |
+| **Windows Endpoint** | Windows 10 Pro | Domain-joined workstation, Sysmon, Wazuh Agent |
+| **Linux Endpoint** | Ubuntu 22.04 | Linux client, Wazuh Agent, YARA |
+| **Attacker** | Kali Linux | Adversary emulation & attack simulation |
+| **SOAR/TIP Platform** | Docker Containers | TheHive, Cortex, OpenCTI, Redis, MinIO, RabbitMQ |
 
-## ⚙️ Lab Environment
+**Network:** Isolated VMware host-only subnet (`192.168.182.0/24`).
 
-| Component | Description |
-|------------|-------------|
-| **Windows Server 2022** | Domain Controller (AD DS, DNS) |
-| **Windows 10** | Workstation joined to domain |
-| **Ubuntu Server** | Wazuh SIEM & Manager |
-| **Ubuntu Desktop** | Linux endpoint with agent |
-| **Kali Linux** | Attacker machine |
-| **Network** | Isolated VMnet1 subnet (192.168.182.0/24) |
+## 🔬 Core Capabilities & Integrations
 
----
+### 🧠 Detection Engineering
+- **Custom Detection Rules:** Developed Wazuh rules for AD attacks (DCSync, Kerberoasting, Golden Ticket), SSH brute-force, and suspicious file creation.
+- **Log Source Integration:** Ingested Windows Security Events, Sysmon logs, Linux audit logs, and application logs into Wazuh.
+- **False Positive Reduction:** Tuned rules based on lab activity to increase signal-to-noise ratio.
 
-## 🔍 Main Features
-- **Active Directory attack simulations**  
-  DCSync, Golden Ticket, Kerberoasting, Pass-the-Hash, SMB Relay  
-- **Brute-force detection and automatic IP blocking**
-- **VirusTotal integration** for malware verification  
-- **YARA integration** for local malware detection  
-- **AI-powered alert enrichment** using Gemini + Nmap  
-- **Custom Wazuh rules, decoders, and active responses**
+### ⚡ Automated Response
+- **Active Response:** Configured Wazuh to automatically block attacker IPs (via `firewall-drop`) on SSH brute-force detection.
+- **Malware Remediation:** Integrated scripts to remove malicious files identified by VirusTotal or YARA matches.
+- **Threat Intelligence Enrichment:** Built a Python integration to send Nmap scan results to Google Gemini API for AI-powered service analysis and vulnerability context.
 
----
+### 🧩 Toolchain Integration
+- **VirusTotal:** API integration for hash reputation checks on files altered in monitored directories.
+- **YARA:** On-access malware detection via Wazuh FIM events, using curated rulesets.
+- **Full SOC Stack:** Deployed and linked TheHive (case management), Cortex (automated analyzers), and OpenCTI (threat intelligence) via Docker.
 
-## 🧪 Attack Simulations
-- **DCSync (Mimikatz)**
-- **Kerberoasting**
-- **Golden Ticket**
-- **Pass-the-Hash**
-- **NTDS Extraction**
-- **SSH Brute-Force**
-- **LLMNR & SMB Relay**
+## 🧪 Attack Simulations & Detection Analysis
+Simulated advanced attacks to validate detection coverage and practice investigative workflow.
 
-Each attack was detected and correlated in **Wazuh Dashboard** with custom rules and active responses.
+| Attack (MITRE ID) | Tools | Detection Method | Key Investigation Steps |
+|-------------------|-------|------------------|-------------------------|
+| **Kerberoasting (T1558.003)** | Mimikatz, `tgsrepcrack.py` | Wazuh Rule on Event ID 4769 (specific encryption flags) | 1. Correlate with process creation (Sysmon) 2. Identify requested SPN & user 3. Check service account privilege level |
+| **DCSync (T1003.006)** | Mimikatz (`lsadump::dcsync`) | Wazuh Rule on Event ID 4662 (directory replication rights) | 1. Immediately treat as critical. 2. Identify source host and user. 3. Verify if account is authorized for replication. |
+| **Pass-the-Hash (T1550.002)** | Mimikatz (`sekurlsa::pth`) | Wazuh alerts on NTLM authentication anomalies and lateral movement | 1. Trace pass-the-hash to destination system logons. 2. Review source host for prior compromise. |
+| **SSH Brute-Force (T1110)** | Hydra | Custom Wazuh correlation rule + Active Response | 1. Confirm multiple failed auth attempts from single IP. 2. Execute automatic firewall block (180s). 3. Review blocked IP for other malicious activity. |
+| **LLMNR/NBT-NS Poisoning (T1557.001)** | Responder | Detection via anomalous NTLMv2 authentication requests | 1. Identify poisoned name resolution requests. 2. Locate misconfigured client attempting to access non-existent shares. |
 
----
+## 📁 Project Structure
+Wazuh-Lab/
+├── Documentation/ # Full project write-up, diagrams
+├── Config-Snippets/ # Key configuration files (ossec.conf, rules)
+├── Scripts/ # Custom integration scripts (Gemini, YARA, etc.)
+└── Screenshots/ # Detection alerts, dashboard views
 
-## 🧰 Integrations & Automation
-- **VirusTotal API** → Hash analysis and threat verification  
-- **YARA Rules** → File integrity monitoring and malware detection  
-- **Active Response Scripts** → Automatic threat removal and firewall drops  
-- **Gemini AI Integration** → Enrich alerts with vulnerability context  
-- **Nmap Automation** → Periodic network scanning via Wazuh agent
 
----
-
-## 🧠 Goals
-- Build a realistic SOC environment from scratch  
-- Understand blue-team detection and incident response techniques  
-- Automate malware detection and response  
-- Combine security monitoring with AI-based analysis  
-
----
+## 🚀 Getting Started
+1.  **Clone the repo:** `git clone https://github.com/BouraouiMalek/Wazuh-Lab.git`
+2.  **Review Documentation:** The comprehensive guide details VM setup, network configuration, and step-by-step deployment.
+3.  **Replicate the Lab:** Use the provided config snippets and instructions to build your own isolated environment.
 
 ## 👨‍💻 Author
 **Malek Bouraoui**  
-Software Engineer | Aspiring SOC Analyst  
-📍 Tunisia  
-🔗 [LinkedIn](https://www.linkedin.com/in/malek-bouraoui/)  
-🔗 [GitHub](https://github.com/BouraouiMalek)
+Security-Focused Engineer | Detection Builder  
+This project serves as a hands-on deep dive into building and operating a modern threat detection and response stack from the ground up.
+
+🔗 [LinkedIn](https://www.linkedin.com/in/malek-bouraoui/) • 🔗 [GitHub](https://github.com/BouraouiMalek)
 
 ---
-
-⭐ Learning by doing — turning theory into practice.
+*“This lab bridges the gap between security theory and operational practice, proving detection logic and automating response workflows in a controlled environment.”*
