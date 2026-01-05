@@ -44,11 +44,11 @@ Simulated advanced attacks to validate detection coverage and practice investiga
 
 | Attack (MITRE ID) | Tools | Detection Method | Key Investigation Steps |
 |-------------------|-------|------------------|-------------------------|
-| **Kerberoasting (T1558.003)** | Mimikatz, `tgsrepcrack.py` | Wazuh Rule on Event ID 4769 (specific encryption flags) | 1. Correlate with process creation (Sysmon) 2. Identify requested SPN & user 3. Check service account privilege level |
-| **DCSync (T1003.006)** | Mimikatz (`lsadump::dcsync`) | Wazuh Rule on Event ID 4662 (directory replication rights) | 1. Immediately treat as critical. 2. Identify source host and user. 3. Verify if account is authorized for replication. |
-| **Pass-the-Hash (T1550.002)** | Mimikatz (`sekurlsa::pth`) | Wazuh alerts on NTLM authentication anomalies and lateral movement | 1. Trace pass-the-hash to destination system logons. 2. Review source host for prior compromise. |
-| **SSH Brute-Force (T1110)** | Hydra | Custom Wazuh correlation rule + Active Response | 1. Confirm multiple failed auth attempts from single IP. 2. Execute automatic firewall block (180s). 3. Review blocked IP for other malicious activity. |
-| **LLMNR/NBT-NS Poisoning (T1557.001)** | Responder | Detection via anomalous NTLMv2 authentication requests | 1. Identify poisoned name resolution requests. 2. Locate misconfigured client attempting to access non-existent shares. |
+| **Kerberoasting** | Mimikatz, `tgsrepcrack.py` | Wazuh Rule on Event ID 4769 (specific encryption flags) | 1. Correlate with process creation (Sysmon) 2. Identify requested SPN & user 3. Check service account privilege level |
+| **DCSync** | Mimikatz (`lsadump::dcsync`) | Wazuh Rule on Event ID 4662 (directory replication rights) | 1. Immediately treat as critical. 2. Identify source host and user. 3. Verify if account is authorized for replication. |
+| **Pass-the-Hash** | Mimikatz (`sekurlsa::pth`) | Wazuh alerts on NTLM authentication anomalies and lateral movement | 1. Trace pass-the-hash to destination system logons. 2. Review source host for prior compromise. |
+| **SSH Brute-Force** | Hydra | Custom Wazuh correlation rule + Active Response | 1. Confirm multiple failed auth attempts from single IP. 2. Execute automatic firewall block. 3. Review blocked IP for other malicious activity. |
+| **LLMNR/NBT-NS Poisoning** | Responder | Detection via anomalous NTLMv2 authentication requests | 1. Identify poisoned name resolution requests. 2. Locate misconfigured client attempting to access non-existent shares. |
 
 ## 📁 Project Structure
 Wazuh-Lab/
