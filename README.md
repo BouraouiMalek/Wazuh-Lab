@@ -50,13 +50,6 @@ Simulated advanced attacks to validate detection coverage and practice investiga
 | **SSH Brute-Force** | Hydra | Custom Wazuh correlation rule + Active Response | 1. Confirm multiple failed auth attempts from single IP. 2. Execute automatic firewall block. 3. Review blocked IP for other malicious activity. |
 | **LLMNR/NBT-NS Poisoning** | Responder | Detection via anomalous NTLMv2 authentication requests | 1. Identify poisoned name resolution requests. 2. Locate misconfigured client attempting to access non-existent shares. |
 
-## 📁 Project Structure
-Wazuh-Lab/
-├── Documentation/ # Full project write-up, diagrams
-├── Config-Snippets/ # Key configuration files (ossec.conf, rules)
-├── Scripts/ # Custom integration scripts (Gemini, YARA, etc.)
-└── Screenshots/ # Detection alerts, dashboard views
-
 
 ## 🚀 Getting Started
 1.  **Clone the repo:** `git clone https://github.com/BouraouiMalek/Wazuh-Lab.git`
